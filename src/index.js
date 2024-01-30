@@ -10,6 +10,24 @@
 
 export default {
 	async fetch(request, env, ctx) {
-		return new Response('Hello World!');
+		try {
+			let myKey = {
+				userId: "1235",
+				secretId: "secret123",
+				templateId: "https://static-page-demo-test.pages.dev/"
+			}
+			let jsonString = JSON.stringify(myKey)
+			await env.kv_handler.put("user_secret", jsonString)
+			let value = await env.kv_handler.get("user_secret")
+			//in deployment it returns null
+			if (value === null) {
+				//in deployment it stops here
+				return new Response('value not found', { status: 404 })
+			}
+			return new Response("value is: " + value)
+		} catch (error) {
+			console.log('KV returned an Error: ' + error)
+			return new Response(error + { status: 500 })
+		}
 	},
 };
